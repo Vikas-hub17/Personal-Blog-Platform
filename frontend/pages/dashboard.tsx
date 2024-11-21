@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import withAuth from '../utils/withAuth';
 import api from '../utils/api';
 
-export default function Dashboard() {
+function Dashboard() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
@@ -22,25 +23,25 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-100">
-      <div className="w-full max-w-2xl bg-white p-6 rounded-md shadow-md mt-10">
-        <h2 className="text-2xl font-bold mb-4">Create a New Post</h2>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="w-full max-w-2xl bg-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Create a New Post</h2>
         <input
           type="text"
           placeholder="Title"
-          className="w-full mb-4 p-2 border rounded"
+          className="w-full mb-4 p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
         <textarea
           placeholder="Content"
-          className="w-full mb-4 p-2 border rounded"
+          className="w-full mb-4 p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           value={content}
           onChange={(e) => setContent(e.target.value)}
         />
         <button
           onClick={handlePost}
-          className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
         >
           Post
         </button>
@@ -48,3 +49,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+export default withAuth(Dashboard);
