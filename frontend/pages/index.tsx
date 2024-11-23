@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import Layout from '../components/Layout';
+import { useState, useEffect } from 'react';
 
 type Post = {
   id: string;
@@ -7,6 +8,7 @@ type Post = {
   content: string;
   authorId: string;
   createdAt: string;
+  formattedDate?: string; 
 };
 
 const Heading = styled.h2`
@@ -61,8 +63,20 @@ const Meta = styled.small`
 `;
 
 export default function Home({ posts }: { posts: Post[] }) {
+  // State to store formatted date
+  const [formattedPosts, setFormattedPosts] = useState<Post[]>([]);
+
+  useEffect(() => {
+    // Format the dates only on the client-side
+    const formatted = posts.map((post) => ({
+      ...post,
+      formattedDate: new Date(post.createdAt).toLocaleDateString(),
+    }));
+    setFormattedPosts(formatted);
+  }, [posts]);
+
   // Provide a fallback if `posts` is undefined
-  if (!posts || posts.length === 0) {
+  if (!formattedPosts || formattedPosts.length === 0) {
     return (
       <Layout>
         <Heading>No Blog Posts Available</Heading>
@@ -74,12 +88,12 @@ export default function Home({ posts }: { posts: Post[] }) {
     <Layout>
       <Heading>All Blog Posts</Heading>
       <Grid>
-        {posts.map((post) => (
+        {formattedPosts.map((post) => (
           <Card key={post.id}>
             <Title>{post.title}</Title>
             <Content>{post.content}</Content>
             <Meta>
-              By: {post.authorId} | {new Date(post.createdAt).toLocaleDateString()}
+              By: {post.authorId} | {post.formattedDate}
             </Meta>
           </Card>
         ))}

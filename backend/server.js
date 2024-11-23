@@ -18,23 +18,8 @@ app.use('/auth', authRoutes);
 app.use('/posts', postRoutes);
 app.use(cors()); // Enable CORS for all requests
 
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('MongoDB Connected');
-  } catch (error) {
-    console.error('Error connecting to MongoDB:', error.message);
-    process.exit(1);
-  }
-};
-
-connectDB();
-
 mongoose
-  .connect(process.env.MONGO_URI, { useNewUrlParser: true }) // Remove useNewUrlParser & useUnifiedTopology
+  .connect(process.env.MONGO_URI) // Remove useNewUrlParser & useUnifiedTopology
   .then(() => console.log('Connected to MongoDB'))
   .catch((err) => console.error('MongoDB connection error:', err));
 
