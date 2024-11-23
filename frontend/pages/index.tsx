@@ -31,12 +31,20 @@ export default function Home({ posts }: { posts: Post[] }) {
   );
 }
 
-// Server-side rendering for the homepage
 export async function getServerSideProps() {
-  const response = await api.get('/posts');
-  return {
-    props: {
-      posts: response.data,
-    },
-  };
+  try {
+    const response = await api.get('/posts'); // Ensure this matches your backend route
+    return {
+      props: {
+        posts: response.data,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching posts:', error.message);
+    return {
+      props: {
+        posts: [], // Return an empty array as fallback
+      },
+    };
+  }
 }
