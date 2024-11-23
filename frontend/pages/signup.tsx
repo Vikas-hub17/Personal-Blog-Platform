@@ -1,79 +1,149 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: #f8f9fa;
-`;
-
-const FormWrapper = styled.div`
-  width: 100%;
   max-width: 400px;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #fff;
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1s ease-in;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 `;
 
-const Heading = styled.h2`
-  font-size: 1.8rem;
+const Title = styled.h2`
+  font-size: 2rem;
   text-align: center;
   margin-bottom: 20px;
-  color: #333;
+  color: #444;
+  animation: slideUp 0.8s ease-out;
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const ErrorMessage = styled.p`
+  color: red;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
+  padding: 12px;
+  margin: 8px 0;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+  }
 `;
 
 const Button = styled.button`
   width: 100%;
-  padding: 10px;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
   border: none;
-  border-radius: 5px;
-  background: #007bff;
-  color: #fff;
+  border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
+  transition: background-color 0.3s;
 
   &:hover {
-    background: #0056b3;
+    background-color: #0056b3;
   }
 `;
 
-export default function Signup() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+`;
 
-  const handleSignup = async () => {
-    // Signup logic
+const Signup = () => {
+  const [username, setUsername] = useState('John_Doe');
+  const [email, setEmail] = useState('john.doe@example.com');
+  const [password, setPassword] = useState('$2b$10$EIXzYcKCzSv8h30z4aPXeOZZz4wT6j1r7U0vbxqG/R9YY7jHjqX2W');
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        router.push('/login'); // Redirect to login page after successful signup
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError('An error occurred during signup.');
+    }
   };
 
   return (
     <Container>
-      <FormWrapper>
-        <Heading>Sign Up</Heading>
+      <Title>Sign Up</Title>
+      {error && <ErrorMessage>{error}</ErrorMessage>}
+      <Form onSubmit={handleSubmit}>
+        <Input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+          required
+        />
         <Input
           type="email"
-          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          required
         />
         <Input
           type="password"
-          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          required
         />
-        <Button onClick={handleSignup}>Sign Up</Button>
-      </FormWrapper>
+        <Button type="submit">Sign Up</Button>
+      </Form>
     </Container>
   );
-}
+};
+
+export default Signup;

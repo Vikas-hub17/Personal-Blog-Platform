@@ -1,137 +1,225 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import styled from 'styled-components';
-import withAuth from '../utils/withAuth';
-import api from '../utils/api';
 
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: #f3f4f6;
-`;
+// Define the Post type
+type Post = {
+  id: string;
+  title: string;
+  content: string;
+};
 
-const Wrapper = styled.div`
-  width: 100%;
-  max-width: 600px;
+const DashboardContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #fff;
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1s ease-in;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 `;
 
-const Heading = styled.h2`
-  font-size: 1.8rem;
-  font-weight: bold;
-  margin-bottom: 20px;
+const Title = styled.h2`
+  font-size: 2rem;
   color: #333;
   text-align: center;
+  margin-bottom: 20px;
+`;
+
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 `;
 
 const Input = styled.input`
-  width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
   font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 
   &:focus {
-    border-color: #3b82f6;
+    border-color: #0070f3;
     outline: none;
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
   }
 `;
 
 const TextArea = styled.textarea`
-  width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
   font-size: 1rem;
-  resize: none;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 
   &:focus {
-    border-color: #3b82f6;
+    border-color: #0070f3;
     outline: none;
-    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
   }
 `;
 
 const Button = styled.button`
-  width: 100%;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  background: #3b82f6;
-  color: #fff;
+  padding: 12px;
   font-size: 1rem;
+  color: #fff;
+  background-color: #0070f3;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s ease;
 
   &:hover {
-    background: #2563eb;
-  }
-
-  &:disabled {
-    background: #9ca3af;
-    cursor: not-allowed;
+    background-color: #005bb5;
   }
 `;
 
-function Dashboard() {
+const PostList = styled.div`
+  margin-top: 30px;
+`;
+
+const PostCard = styled.div`
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+
+  h3 {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: #555;
+  }
+`;
+
+const Dashboard = () => {
+  const [user, setUser] = useState<{ username: string; email: string } | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]); // Correctly type the posts array
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  const handlePost = async () => {
-    if (!title.trim() || !content.trim()) {
-      alert('Title and content are required!');
+  // Fetch logged-in user data
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      router.push('/login'); // Redirect to login if not logged in
       return;
     }
 
+    // Fetch user data (simulate fetching user data for now)
+    setUser({ username: 'john_doe', email: 'john.doe@example.com' });
+
+    // Fetch user's posts
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/api/posts/my-posts', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setPosts(data.posts); // Update posts with fetched data
+        } else {
+          setError('Failed to fetch posts.');
+        }
+      } catch (err) {
+        setError('An error occurred while fetching posts.');
+      }
+    };
+
+    fetchPosts();
+  }, [router]);
+
+  const handlePostSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    const token = localStorage.getItem('token');
     try {
-      setLoading(true);
-      const token = localStorage.getItem('token');
-      await api.post(
-        '/posts',
-        { title, content },
-        { headers: { Authorization: token } }
-      );
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title, content }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create post.');
+      }
+  
+      const newPost = await response.json();
+      setPosts((prevPosts) => [newPost, ...prevPosts]); // Add the new post locally
       setTitle('');
       setContent('');
-      alert('Post created successfully!');
-    } catch (error) {
-      console.error('Error creating post:', error);
-      alert('Failed to create post. Please try again.');
-    } finally {
-      setLoading(false);
+      router.push('/'); // Redirect to index.tsx
+    } catch (err) {
+      console.error('Error:', err);
+      setError('An error occurred while creating the post.');
     }
-  };
+  };  
+  
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <Container>
-      <Wrapper>
-        <Heading>Create a New Post</Heading>
+    <DashboardContainer>
+      <Title>Welcome, {user.username}</Title>
+      <p>Email: {user.email}</p>
+
+      <h3>Create a New Post</h3>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <Form onSubmit={handlePostSubmit}>
         <Input
           type="text"
           placeholder="Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          required
         />
         <TextArea
           placeholder="Content"
-          rows={5}
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          rows={5}
+          required
         />
-        <Button onClick={handlePost} disabled={loading}>
-          {loading ? 'Posting...' : 'Post'}
-        </Button>
-      </Wrapper>
-    </Container>
-  );
-}
+        <Button type="submit">Create Post</Button>
+      </Form>
 
-export default withAuth(Dashboard);
+      <PostList>
+        <h3>Your Posts</h3>
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <PostCard key={post.id}>
+              <h3>{post.title}</h3>
+              <p>{post.content}</p>
+            </PostCard>
+          ))
+        ) : (
+          <p>No posts available. Start writing your first post!</p>
+        )}
+      </PostList>
+    </DashboardContainer>
+  );
+};
+
+export default Dashboard;

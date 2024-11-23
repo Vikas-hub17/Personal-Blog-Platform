@@ -44,6 +44,22 @@ const Card = styled.div`
   }
 `;
 
+const SearchBar = styled.input`
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  margin: 20px auto;
+  display: block;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+
+  &:focus {
+    outline: none;
+    border-color: #666;
+  }
+`;
+
 const Title = styled.h3`
   font-size: 1.2rem;
   font-weight: bold;
@@ -65,6 +81,7 @@ const Meta = styled.small`
 export default function Home({ posts }: { posts: Post[] }) {
   // State to store formatted date
   const [formattedPosts, setFormattedPosts] = useState<Post[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     // Format the dates only on the client-side
@@ -74,6 +91,10 @@ export default function Home({ posts }: { posts: Post[] }) {
     }));
     setFormattedPosts(formatted);
   }, [posts]);
+
+  const filteredPosts = formattedPosts.filter((post) =>
+    post.authorId?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Provide a fallback if `posts` is undefined
   if (!formattedPosts || formattedPosts.length === 0) {
@@ -86,9 +107,16 @@ export default function Home({ posts }: { posts: Post[] }) {
 
   return (
     <Layout>
-      <Heading>All Blog Posts</Heading>
+      <Heading>Posts</Heading>
+      <SearchBar
+        type="text"
+        placeholder="Search by author name..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+      />
+
       <Grid>
-        {formattedPosts.map((post) => (
+        {filteredPosts.map((post) => (
           <Card key={post.id}>
             <Title>{post.title}</Title>
             <Content>{post.content}</Content>
