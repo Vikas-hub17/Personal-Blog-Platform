@@ -2,8 +2,6 @@
 
 A simple blog platform where users can create, manage, and view blog posts. The platform includes authentication (sign up, login), post creation, and post management functionalities, along with a user dashboard.
 
-![Screenshot 2024-11-23 160558](https://github.com/user-attachments/assets/78cdf8f1-ccb0-4500-b764-d4215a993611)
-
 ![Screenshot 2024-11-23 225648](https://github.com/user-attachments/assets/866b5b43-ee4c-48ea-8b54-f24fab7a6568)
 
 ![Screenshot 2024-11-23 225657](https://github.com/user-attachments/assets/e94bd122-525b-438a-a19b-aec5d67a822d)
