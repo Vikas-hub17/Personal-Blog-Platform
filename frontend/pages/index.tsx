@@ -7,15 +7,17 @@ type Post = {
   title: string;
   content: string;
   authorId: string;
+  authorName: string;
   createdAt: string;
-  formattedDate?: string; 
+  formattedDate?: string;
 };
 
 const Heading = styled.h2`
-  font-size: 2rem;
+  font-size: 2.5rem;
   text-align: center;
   margin-bottom: 20px;
-  color: #444;
+  color: #333;
+  font-weight: 600;
 `;
 
 const Grid = styled.div`
@@ -33,59 +35,94 @@ const Grid = styled.div`
 `;
 
 const Card = styled.div`
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
   background: #fff;
-  transition: box-shadow 0.2s;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 
   &:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-`;
-
-const SearchBar = styled.input`
-  width: 100%;
-  max-width: 400px;
-  padding: 10px;
-  margin: 20px auto;
-  display: block;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-
-  &:focus {
-    outline: none;
-    border-color: #666;
+    transform: translateY(-10px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
   }
 `;
 
 const Title = styled.h3`
-  font-size: 1.2rem;
-  font-weight: bold;
+  font-size: 1.6rem;
+  font-weight: 700;
   color: #222;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 `;
 
 const Content = styled.p`
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #555;
-  margin-bottom: 10px;
+  line-height: 1.6;
+  margin-bottom: 16px;
 `;
 
 const Meta = styled.small`
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 0.9rem;
+  color: #777;
+  font-style: italic;
+`;
+
+const SearchBarWrapper = styled.div`
+  position: relative;
+  max-width: 500px;
+  margin: 30px auto;
+`;
+
+const SearchIcon = styled.div`
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #007bff;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+`;
+
+const SearchBar = styled.input`
+  width: 100%;
+  padding: 12px 16px 12px 40px;
+  margin: 0 auto;
+  display: block;
+  border: 1px solid #ddd;
+  border-radius: 50px;
+  font-size: 1rem;
+  background-color: #f4f4f4;
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    background-color: #fff;
+  }
+
+  &:focus + ${SearchIcon} {
+    color: #0056b3;
+  }
 `;
 
 export default function Home({ posts }: { posts: Post[] }) {
-  // State to store formatted date
   const [formattedPosts, setFormattedPosts] = useState<Post[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  const fallbackPosts: Post[] = [
+    { id: '1', title: 'Understanding React Hooks', content: 'React Hooks revolutionize...', authorId: 'ReactGuru', authorName: 'John Doe', createdAt: new Date().toISOString() },
+    { id: '2', title: 'Mastering JavaScript ES6', content: 'ES6 is a major update to JavaScript...', authorId: 'JSExpert', authorName: 'Jane Smith', createdAt: new Date().toISOString() },
+    { id: '3', title: 'CSS Grid vs Flexbox', content: 'CSS Grid and Flexbox are powerful layout systems...', authorId: 'DesignPro', authorName: 'Alice Brown', createdAt: new Date().toISOString() },
+    { id: '4', title: 'TypeScript Basics', content: 'TypeScript adds static types to JavaScript...', authorId: 'TSMaster', authorName: 'Bob White', createdAt: new Date().toISOString() },
+    { id: '5', title: 'Building Web APIs with Node.js', content: 'Node.js is an asynchronous event-driven JavaScript runtime...', authorId: 'NodeHero', authorName: 'Charlie Green', createdAt: new Date().toISOString() },
+    { id: '6', title: 'Introduction to MongoDB', content: 'MongoDB is a NoSQL database...', authorId: 'DatabaseGuru', authorName: 'David Lee', createdAt: new Date().toISOString() },
+    { id: '7', title: 'GraphQL for Beginners', content: 'GraphQL is a query language for APIs...', authorId: 'GraphQLWizard', authorName: 'Eve Miller', createdAt: new Date().toISOString() },
+    { id: '8', title: 'Responsive Web Design', content: 'Responsive Web Design ensures websites look good on all devices...', authorId: 'WebDev', authorName: 'Frank Harris', createdAt: new Date().toISOString() }
+  ];
+
   useEffect(() => {
-    // Format the dates only on the client-side
-    const formatted = posts.map((post) => ({
+    const formatted = [...posts, ...fallbackPosts].map((post) => ({
       ...post,
       formattedDate: new Date(post.createdAt).toLocaleDateString(),
     }));
@@ -93,38 +130,35 @@ export default function Home({ posts }: { posts: Post[] }) {
   }, [posts]);
 
   const filteredPosts = formattedPosts.filter((post) =>
-    post.authorId?.toLowerCase().includes(searchQuery.toLowerCase())
+    post.authorName.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Provide a fallback if `posts` is undefined
-  if (!formattedPosts || formattedPosts.length === 0) {
-    return (
-      <Layout>
-        <Heading>No Blog Posts Available</Heading>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
       <Heading>Posts</Heading>
-      <SearchBar
-        type="text"
-        placeholder="Search by author name..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
+      <SearchBarWrapper>
+        <SearchBar
+          type="text"
+          placeholder="Search by author name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </SearchBarWrapper>
 
       <Grid>
-        {filteredPosts.map((post) => (
-          <Card key={post.id}>
-            <Title>{post.title}</Title>
-            <Content>{post.content}</Content>
-            <Meta>
-              By: {post.authorId} | {post.formattedDate}
-            </Meta>
-          </Card>
-        ))}
+        {filteredPosts.length === 0 ? (
+          <p>No posts found matching the author name.</p>
+        ) : (
+          filteredPosts.map((post) => (
+            <Card key={post.id}>
+              <Title>{post.title}</Title>
+              <Content>{post.content}</Content>
+              <Meta>
+                By: {post.authorName} | {post.formattedDate}
+              </Meta>
+            </Card>
+          ))
+        )}
       </Grid>
     </Layout>
   );
@@ -141,9 +175,7 @@ export async function getServerSideProps() {
     const posts = await response.json();
     return { props: { posts } };
   } catch (error) {
-    // Type casting the error
-    const err = error as Error;
-    console.error('Error fetching posts:', err.message);
+    console.error('Error fetching posts:', (error as Error).message);
     return { props: { posts: [] } };
   }
 }

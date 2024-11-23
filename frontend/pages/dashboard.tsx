@@ -10,73 +10,78 @@ type Post = {
 };
 
 const DashboardContainer = styled.div`
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  animation: fadeIn 1s ease-in;
-
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 1s ease-in-out;
 `;
 
 const Title = styled.h2`
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: #333;
   text-align: center;
   margin-bottom: 20px;
+  font-weight: 600;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
+  margin-bottom: 30px;
 `;
 
 const Input = styled.input`
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 15px;
+  font-size: 1.1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 
   &:focus {
     border-color: #0070f3;
+    box-shadow: 0 0 8px rgba(0, 112, 243, 0.5);
     outline: none;
   }
 `;
 
 const TextArea = styled.textarea`
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 15px;
+  font-size: 1.1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 
   &:focus {
     border-color: #0070f3;
+    box-shadow: 0 0 8px rgba(0, 112, 243, 0.5);
     outline: none;
   }
 `;
 
 const Button = styled.button`
-  padding: 12px;
-  font-size: 1rem;
-  color: #fff;
+  padding: 14px;
+  font-size: 1.2rem;
+  color: white;
   background-color: #0070f3;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 
   &:hover {
     background-color: #005bb5;
+  }
+`;
+
+const LogOutButton = styled(Button)`
+  background-color: #ff4d4d;
+  margin-top: 20px;
+  &:hover {
+    background-color: #e60000;
   }
 `;
 
@@ -103,15 +108,33 @@ const PostCard = styled.div`
   }
 `;
 
+const PostPreview = styled.div`
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-top: 30px;
+
+  h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 15px;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #555;
+  }
+`;
+
 const Dashboard = () => {
   const [user, setUser] = useState<{ username: string; email: string } | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [posts, setPosts] = useState<Post[]>([]); // Correctly type the posts array
+  const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState('');
   const router = useRouter();
 
-  // Fetch logged-in user data
   useEffect(() => {
     const token = localStorage.getItem('token');
 
@@ -120,7 +143,6 @@ const Dashboard = () => {
       return;
     }
 
-    // Fetch user data (simulate fetching user data for now)
     setUser({ username: 'john_doe', email: 'john.doe@example.com' });
 
     // Fetch user's posts
@@ -148,7 +170,7 @@ const Dashboard = () => {
 
   const handlePostSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     const token = localStorage.getItem('token');
     try {
       const response = await fetch('/api/posts', {
@@ -159,12 +181,12 @@ const Dashboard = () => {
         },
         body: JSON.stringify({ title, content }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to create post.');
       }
-  
+
       const newPost = await response.json();
       setPosts((prevPosts) => [newPost, ...prevPosts]); // Add the new post locally
       setTitle('');
@@ -174,8 +196,13 @@ const Dashboard = () => {
       console.error('Error:', err);
       setError('An error occurred while creating the post.');
     }
-  };  
-  
+  };
+
+  const handleLogOut = () => {
+    localStorage.removeItem('token');
+    router.push('/login');
+  };
+
   if (!user) {
     return <div>Loading...</div>;
   }
@@ -192,18 +219,24 @@ const Dashboard = () => {
           type="text"
           placeholder="Title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
           required
         />
         <TextArea
           placeholder="Content"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value)}
           rows={5}
           required
         />
         <Button type="submit">Create Post</Button>
       </Form>
+
+      <PostPreview>
+        <h3>Post Preview</h3>
+        <h4>{title || 'Enter a title'}</h4>
+        <p>{content || 'Enter content for your post'}</p>
+      </PostPreview>
 
       <PostList>
         <h3>Your Posts</h3>
@@ -218,6 +251,8 @@ const Dashboard = () => {
           <p>No posts available. Start writing your first post!</p>
         )}
       </PostList>
+
+      <LogOutButton onClick={handleLogOut}>Log Out</LogOutButton>
     </DashboardContainer>
   );
 };
