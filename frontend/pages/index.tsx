@@ -61,6 +61,15 @@ const Meta = styled.small`
 `;
 
 export default function Home({ posts }: { posts: Post[] }) {
+  // Provide a fallback if `posts` is undefined
+  if (!posts || posts.length === 0) {
+    return (
+      <Layout>
+        <Heading>No Blog Posts Available</Heading>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <Heading>All Blog Posts</Heading>
@@ -77,4 +86,22 @@ export default function Home({ posts }: { posts: Post[] }) {
       </Grid>
     </Layout>
   );
+}
+
+export async function getServerSideProps() {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/posts`);
+    if (!response.ok) {
+      console.error('Failed to fetch posts:', response.statusText);
+      return { props: { posts: [] } };
+    }
+
+    const posts = await response.json();
+    return { props: { posts } };
+  } catch (error) {
+    // Type casting the error
+    const err = error as Error;
+    console.error('Error fetching posts:', err.message);
+    return { props: { posts: [] } };
+  }
 }
