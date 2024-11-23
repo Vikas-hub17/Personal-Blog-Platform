@@ -1,46 +1,79 @@
 import { useState } from 'react';
-import api from '../utils/api';
-import { useRouter } from 'next/router';
+import styled from 'styled-components';
+
+const Container = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f8f9fa;
+`;
+
+const FormWrapper = styled.div`
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const Heading = styled.h2`
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+`;
+
+const Button = styled.button`
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background: #007bff;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #0056b3;
+  }
+`;
 
 export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
 
   const handleSignup = async () => {
-    try {
-      await api.post('/auth/signup', { email, password });
-      router.push('/login');
-    } catch (error) {
-      console.error(error);
-    }
+    // Signup logic
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white p-6 rounded-md shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-4">Sign Up</h2>
-        <input
+    <Container>
+      <FormWrapper>
+        <Heading>Sign Up</Heading>
+        <Input
           type="email"
           placeholder="Email"
-          className="w-full mb-4 p-2 border rounded"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <input
+        <Input
           type="password"
           placeholder="Password"
-          className="w-full mb-4 p-2 border rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button
-          onClick={handleSignup}
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-        >
-          Sign Up
-        </button>
-      </div>
-    </div>
+        <Button onClick={handleSignup}>Sign Up</Button>
+      </FormWrapper>
+    </Container>
   );
 }

@@ -1,5 +1,5 @@
+import styled from 'styled-components';
 import Layout from '../components/Layout';
-import api from '../utils/api';
 
 type Post = {
   id: string;
@@ -9,42 +9,72 @@ type Post = {
   createdAt: string;
 };
 
+const Heading = styled.h2`
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #444;
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+`;
+
+const Card = styled.div`
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background: #fff;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+`;
+
+const Title = styled.h3`
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 10px;
+`;
+
+const Content = styled.p`
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 10px;
+`;
+
+const Meta = styled.small`
+  font-size: 0.8rem;
+  color: #999;
+`;
+
 export default function Home({ posts }: { posts: Post[] }) {
   return (
     <Layout>
-      <h2 className="text-2xl font-semibold mb-6 text-center">All Blog Posts</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Heading>All Blog Posts</Heading>
+      <Grid>
         {posts.map((post) => (
-          <div
-            key={post.id}
-            className="border p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-lg font-bold mb-2 text-gray-800">{post.title}</h3>
-            <p className="text-sm text-gray-600 mb-4 line-clamp-3">{post.content}</p>
-            <small className="text-xs text-gray-500">
+          <Card key={post.id}>
+            <Title>{post.title}</Title>
+            <Content>{post.content}</Content>
+            <Meta>
               By: {post.authorId} | {new Date(post.createdAt).toLocaleDateString()}
-            </small>
-          </div>
+            </Meta>
+          </Card>
         ))}
-      </div>
+      </Grid>
     </Layout>
   );
-}
-
-export async function getServerSideProps() {
-  try {
-    const response = await api.get('/posts'); // Ensure this matches your backend route
-    return {
-      props: {
-        posts: response.data,
-      },
-    };
-  } catch (error) {
-    console.error('Error fetching posts:', error.message);
-    return {
-      props: {
-        posts: [], // Return an empty array as fallback
-      },
-    };
-  }
 }
