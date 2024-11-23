@@ -3,6 +3,18 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
+const { register, login, verifyToken } = require('../controllers/authController');
+
+// Registration route
+router.post('/register', register);
+
+// Login route
+router.post('/login', login);
+
+// Protected route example
+router.get('/protected', verifyToken, (req, res) => {
+  res.status(200).json({ message: 'Access granted to protected route' });
+});
 
 router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
