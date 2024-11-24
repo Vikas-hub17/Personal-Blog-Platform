@@ -57,12 +57,14 @@ Follow the instructions below to get the project up and running locally.
    git clone https://github.com/Vikas-hub17/personal-blog-platform.git
    cd personal-blog-platform/backend
    
-2. **Create a .env file in the backend directory and add your MongoDB connection URI and JWT secret:**:
+2. **Create a .env file in the backend directory and add your MongoDB connection URI and JWT secret:**
+   ```
    MONGO_URI=your_mongodb_connection_uri
    JWT_SECRET=your_jwt_secret
    PORT=5000
 
-3. **Start the backend Server**:
+4. **Start the backend Server**:
+   ```
    npm start
 
 ### Frontend Setup
@@ -72,10 +74,12 @@ Follow the instructions below to get the project up and running locally.
    cd personal-blog-platform/frontend
    
 2. **Create a .env.local file in the frontend directory and add your API base URL:**
+   ```
    NEXT_PUBLIC_API_BASE_URL=http://localhost:5000
 
 
 4. **Start the backend Server**:
+   ```
    npm run dev
 
 **How to Use**
